@@ -325,7 +325,10 @@
     </div>
 
     <script>
-        // BASE DE DATOS DE PREGUNTAS
+        // URL de Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxD7M5_YHQc5-tIidWFVjQJucge6xWNhedZ6mIrjEVScLFoXBx3kh_lV27dshVF5QA2zA/exec';
+        
+        // BASE DE DATOS DE PREGUNTAS DE RESPALDO (si falla Google Sheets)
         const QUESTIONS = [
             { q: "¿Cuál es el étimo latino de 'oculista'?", opts: ["oculus, i", "caput, capitis", "dens, dentis", "pes, pedis"], correct: 0, exp: "Oculus, i significa 'ojo' en latín" },
             { q: "¿Qué significa el sufijo griego '-itis'?", opts: ["dolor", "inflamación", "enfermedad", "estudio"], correct: 1, exp: "-itis significa inflamación" },
