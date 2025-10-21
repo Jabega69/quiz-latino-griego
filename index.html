@@ -1,4 +1,4 @@
-// ===== CONFIGURACIÓN =====
+
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSv5b_zlYNBBvXg_VuGeXV5Mp0jqsNGSnpfG3lRVVMvXOAcsYA1PnhcKzbkKxkj-TU/exec';
 const TIEMPO_PREGUNTA = 20;
 const PREGUNTAS_POR_EQUIPO = 10; // Cada equipo responde 10 preguntas
@@ -162,4 +162,130 @@ function checkAnswer(selectedAnswer) {
     
     const question = allQuestions[currentQuestionIndex];
     const currentTeam = teams[currentTeamIndex];
-    const isCorrect = selectedAnswer === question.correcta
+    const isCorrect = selectedAnswer === question.correcta;
+
+    // Actualizar puntuación
+    if (isCorrect) {
+        currentTeam.score += 10;
+        console.log(`✅ CORRECTO - ${currentTeam.name}: +10 puntos (Total: ${currentTeam.score})`);
+    } else if (selectedAnswer === null) {
+        console.log(`⏰ TIEMPO AGOTADO - ${currentTeam.name}`);
+    } else {
+        console.log(`❌ INCORRECTO - ${currentTeam.name}`);
+    }
+
+    // Mostrar resultado
+    showResult(isCorrect, selectedAnswer === null, question);
+}
+
+// ===== MOSTRAR RESULTADO =====
+function showResult(isCorrect, timeOut, question) {
+    document.getElementById('question-screen').classList.add('hidden');
+    document.getElementById('results-screen').classList.remove('hidden');
+
+    const resultIcon = document.getElementById('result-icon');
+    const resultText = document.getElementById('result-text');
+    const explanationText = document.getElementById('explanation-text');
+
+    if (timeOut) {
+        resultIcon.textContent = '⏰';
+        resultText.textContent = '¡Tiempo agotado!';
+        resultText.className = 'result-text timeout';
+    } else if (isCorrect) {
+        resultIcon.textContent = '✅';
+        resultText.textContent = '¡Correcto! +10 puntos';
+        resultText.className = 'result-text correct';
+    } else {
+        resultIcon.textContent = '❌';
+        resultText.textContent = 'Incorrecto';
+        resultText.className = 'result-text incorrect';
+    }
+
+    explanationText.textContent = `Respuesta correcta: ${question.correcta} - ${question.explicacion}`;
+
+    // Actualizar ranking
+    updateRanking();
+
+    // Avanzar al siguiente equipo/pregunta después de 3 segundos
+    setTimeout(() => {
+        nextQuestion();
+    }, 3000);
+}
+
+// ===== SIGUIENTE PREGUNTA =====
+function nextQuestion() {
+    currentQuestionIndex++;
+    currentTeamIndex++;
+
+    // Si terminó la ronda (los 3 equipos jugaron)
+    if (currentTeamIndex >= teams.length) {
+        currentTeamIndex = 0;
+        roundNumber++;
+        console.log(`\n🔄 NUEVA RONDA ${roundNumber}\n`);
+    }
+
+    // Verificar si el juego terminó
+    if (questionCountPerTeam[1] >= PREGUNTAS_POR_EQUIPO && 
+        questionCountPerTeam[2] >= PREGUNTAS_POR_EQUIPO && 
+        questionCountPerTeam[3] >= PREGUNTAS_POR_EQUIPO) {
+        
+        console.log('🏁 === FIN DE LAS 30 PREGUNTAS ===');
+        endGame();
+    } else {
+        showQuestion();
+    }
+}
+
+// ===== ACTUALIZAR RANKING =====
+function updateRanking() {
+    const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+    
+    sortedTeams.forEach((team, index) => {
+        document.getElementById(`rank${index + 1}-name`).textContent = team.name;
+        document.getElementById(`rank${index + 1}-score`).textContent = team.score;
+    });
+}
+
+// ===== FINALIZAR JUEGO =====
+function endGame() {
+    document.getElementById('results-screen').classList.add('hidden');
+    document.getElementById('final-screen').classList.remove('hidden');
+
+    const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+
+    // Verificar empates
+    const maxScore = sortedTeams[0].score;
+    const winners = sortedTeams.filter(team => team.score === maxScore);
+
+    sortedTeams.forEach((team, index) => {
+        document.getElementById(`final-rank${index + 1}-name`).textContent = team.name;
+        document.getElementById(`final-rank${index + 1}-score`).textContent = team.score;
+        
+        const badge = document.getElementById(`final-rank${index + 1}-badge`);
+        if (index === 0) {
+            badge.textContent = winners.length > 1 ? '🏆' : '🥇';
+            document.getElementById(`final-rank${index + 1}-label`).textContent = 
+                winners.length > 1 ? '¡Empate!' : '¡Campeones!';
+        } else if (index === 1) {
+            badge.textContent = '🥈';
+        } else {
+            badge.textContent = '🥉';
+        }
+    });
+
+    console.log('🏁 JUEGO TERMINADO');
+    console.log('Resultados finales:');
+    sortedTeams.forEach((team, i) => {
+        console.log(`${i + 1}. ${team.name}: ${team.score} puntos (${questionCountPerTeam[team.teamNumber]} preguntas)`);
+    });
+}
+
+// ===== NUEVA PARTIDA =====
+function newGame() {
+    location.reload();
+}
+
+// ===== INICIALIZAR =====
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 Juego de Etimología Latina y Griega iniciado');
+});
