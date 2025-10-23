@@ -604,7 +604,11 @@
             document.getElementById('team-color').className = `team-color team${currentTeam.teamNumber}`;
             document.getElementById('question-number').textContent = 
                 `Pregunta ${questionCountPerTeam[currentTeam.teamNumber]} de ${PREGUNTAS_POR_EQUIPO}`;
-            document.getElementById('question-text').textContent = question.pregunta;
+            
+            // Mostrar la pregunta
+            const questionText = question.pregunta || 'Pregunta no disponible';
+            document.getElementById('question-text').textContent = questionText;
+            console.log('📝 Mostrando pregunta:', questionText);
 
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
