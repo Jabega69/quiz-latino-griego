@@ -496,7 +496,7 @@
 
     <script>
         // ===== CONFIGURACIÓN =====
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWE3Kqf6MmXx3L-EJAN7aCQc5vBZZrSY4kSzTPSmb2Oc5veyPucQjAs9Ik4enXyPP_/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhsABRkbcLLZJB3ZoQmO2mOnOeCXYrG8daSmGD_AkrKXpvc-ql2F08BvYnUZpiLXmSuA/exec';
         const TIEMPO_PREGUNTA = 20;
         const PREGUNTAS_POR_EQUIPO = 10;
         const TOTAL_RONDAS = 10;
@@ -566,9 +566,14 @@
             await loadQuestions();
 
             if (allQuestions.length < 30) {
-                alert('Error: No hay suficientes preguntas');
+                console.warn(`⚠️ Solo hay ${allQuestions.length} preguntas disponibles`);
+                alert(`Error: Se necesitan al menos 30 preguntas.\nSolo se cargaron ${allQuestions.length} preguntas.\n\nVerifica que tu hoja de Google Sheets "Preguntas" tenga al menos 30 filas.`);
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
                 return;
             }
+
+            console.log(`✅ ${allQuestions.length} preguntas listas para jugar`);
 
             document.getElementById('loading-screen').classList.add('hidden');
             showQuestion();
