@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Quiz Etimología Latina y Griega v3.0</title>
+    <title>Quiz Educativo Multi-Materia</title>
     <style>
         * {
             margin: 0;
@@ -50,7 +50,50 @@
             display: none !important;
         }
 
-        /* LOGIN SCREEN */
+        /* ADMIN BUTTON */
+        .admin-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .admin-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        /* SELECTOR DE MATERIA */
+        .materia-selector {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .materia-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .materia-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        /* TEAM INPUT */
         .team-input {
             margin-bottom: 25px;
             padding: 20px;
@@ -67,7 +110,7 @@
         .team2 { border-left: 5px solid #95a5a6; }
         .team3 { border-left: 5px solid #e67e22; }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             margin-bottom: 10px;
@@ -77,7 +120,7 @@
             transition: border-color 0.3s;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -103,7 +146,7 @@
             transform: translateY(0);
         }
 
-        /* LOADING SCREEN */
+        /* LOADING */
         .loading {
             text-align: center;
             padding: 50px;
@@ -220,7 +263,7 @@
             flex-shrink: 0;
         }
 
-        /* RESULTS SCREEN */
+        /* RESULTS */
         .result-container {
             text-align: center;
             padding: 40px;
@@ -289,7 +332,7 @@
             color: #667eea;
         }
 
-        /* FINAL SCREEN */
+        /* FINAL */
         .final-container {
             text-align: center;
         }
@@ -351,9 +394,63 @@
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        /* ADMIN PANEL */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .admin-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .admin-close {
+            float: right;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .materia-list {
+            margin: 20px 0;
+        }
+
+        .materia-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .materia-item strong {
+            color: #2c3e50;
+        }
+
+        .materia-count {
+            color: #7f8c8d;
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
@@ -377,10 +474,20 @@
     </style>
 </head>
 <body>
+    <button class="admin-btn" onclick="toggleAdmin()">👤 Admin</button>
+
     <div class="container">
         <!-- PANTALLA DE LOGIN -->
         <div id="login-screen">
-            <h1>🏛️ Quiz Etimología</h1>
+            <h1>🎓 Quiz Educativo</h1>
+            
+            <div class="materia-selector">
+                <label for="materia-select">📚 Selecciona la materia:</label>
+                <select id="materia-select">
+                    <option value="">Cargando materias...</option>
+                </select>
+            </div>
+
             <h2>Registro de Equipos</h2>
             
             <div class="team-input team1">
@@ -409,7 +516,7 @@
             <div class="loading">
                 <h2>Cargando preguntas...</h2>
                 <div class="spinner"></div>
-                <p>Conectando con Google Sheets</p>
+                <p id="loading-text">Conectando con Google Sheets</p>
             </div>
         </div>
 
@@ -499,12 +606,40 @@
         </div>
     </div>
 
+    <!-- PANEL DE ADMINISTRADOR -->
+    <div id="admin-panel" class="admin-panel hidden">
+        <div class="admin-content">
+            <button class="admin-close" onclick="toggleAdmin()">✕ Cerrar</button>
+            <h2>🔐 Panel de Administrador</h2>
+            
+            <div id="admin-login">
+                <input type="password" id="admin-password" placeholder="Contraseña de administrador">
+                <button onclick="loginAdmin()">Entrar</button>
+            </div>
+
+            <div id="admin-dashboard" class="hidden">
+                <h3>📚 Materias Disponibles</h3>
+                <div id="materias-list" class="materia-list"></div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 10px;">
+                    <h4>📄 Añadir Nueva Materia</h4>
+                    <p>Para añadir una nueva materia con 300 preguntas:</p>
+                    <ol style="margin: 15px 0; padding-left: 20px;">
+                        <li>Envía el PDF de la materia a Claude</li>
+                        <li>Claude generará 300 preguntas automáticamente</li>
+                        <li>Ejecuta el código que te proporcione en Apps Script</li>
+                        <li>La nueva materia aparecerá aquí automáticamente</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ===== CONFIGURACIÓN =====
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhsABRkbcLLZJB3ZoQmO2mOnOeCXYrG8daSmGD_AkrKXpvc-ql2F08BvYnUZpiLXmSuA/exec';
         const TIEMPO_PREGUNTA = 20;
         const PREGUNTAS_POR_EQUIPO = 10;
-        const TOTAL_RONDAS = 10;
+        const ADMIN_PASSWORD = '1234';
 
         let allQuestions = [];
         let currentQuestionIndex = 0;
@@ -513,6 +648,7 @@
         let timer;
         let timeLeft = TIEMPO_PREGUNTA;
         let roundNumber = 1;
+        let selectedMateria = '';
 
         let questionCountPerTeam = {
             1: 0,
@@ -520,28 +656,71 @@
             3: 0
         };
 
-        // ===== CARGAR PREGUNTAS =====
-        async function loadQuestions() {
+        // CARGAR MATERIAS AL INICIO
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🎮 Sistema Multi-Materia iniciado');
+            await loadMaterias();
+        });
+
+        // CARGAR LISTA DE MATERIAS
+        async function loadMaterias() {
             try {
-                console.log('📥 Cargando preguntas desde Google Sheets...');
-                const response = await fetch(`${SCRIPT_URL}?action=getQuestions`);
+                const response = await fetch(`${SCRIPT_URL}?action=getMaterias`);
+                const materias = await response.json();
+                
+                const select = document.getElementById('materia-select');
+                select.innerHTML = '';
+                
+                if (materias.length === 0) {
+                    select.innerHTML = '<option value="">No hay materias disponibles</option>';
+                    return;
+                }
+                
+                materias.forEach(materia => {
+                    const option = document.createElement('option');
+                    option.value = materia.nombre;
+                    option.textContent = `${materia.nombre} (${materia.totalPreguntas} preguntas)`;
+                    select.appendChild(option);
+                });
+                
+                console.log(`📚 ${materias.length} materias cargadas`);
+            } catch (error) {
+                console.error('❌ Error cargando materias:', error);
+            }
+        }
+
+        // CARGAR PREGUNTAS
+        async function loadQuestions(materia) {
+            try {
+                console.log('📥 Cargando preguntas de:', materia);
+                document.getElementById('loading-text').textContent = `Cargando ${materia}...`;
+                
+                const response = await fetch(`${SCRIPT_URL}?action=getQuestions&materia=${encodeURIComponent(materia)}`);
                 const questions = await response.json();
                 
                 if (questions && questions.length > 0) {
                     allQuestions = questions;
-                    console.log(`✅ Preguntas cargadas: ${allQuestions.length}`);
+                    console.log(`✅ ${allQuestions.length} preguntas cargadas de ${materia}`);
                 } else {
                     console.error('❌ No se recibieron preguntas');
                     alert('Error: No se pudieron cargar las preguntas');
                 }
             } catch (error) {
-                console.error('❌ Error al cargar preguntas:', error);
+                console.error('❌ Error:', error);
                 alert('Error de conexión con Google Sheets');
             }
         }
 
-        // ===== INICIAR JUEGO =====
+        // INICIAR JUEGO
         async function startGame() {
+            const materiaSelect = document.getElementById('materia-select');
+            selectedMateria = materiaSelect.value;
+            
+            if (!selectedMateria) {
+                alert('Por favor selecciona una materia');
+                return;
+            }
+
             const team1 = document.getElementById('team1-name').value.trim();
             const team2 = document.getElementById('team2-name').value.trim();
             const team3 = document.getElementById('team3-name').value.trim();
@@ -568,23 +747,21 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('loading-screen').classList.remove('hidden');
 
-            await loadQuestions();
+            await loadQuestions(selectedMateria);
 
             if (allQuestions.length < 30) {
-                console.warn(`⚠️ Solo hay ${allQuestions.length} preguntas disponibles`);
-                alert(`Error: Se necesitan al menos 30 preguntas.\nSolo se cargaron ${allQuestions.length} preguntas.\n\nVerifica que tu hoja de Google Sheets "Preguntas" tenga al menos 30 filas.`);
+                alert(`Error: Se necesitan al menos 30 preguntas.\nSolo hay ${allQuestions.length} preguntas disponibles.`);
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
                 return;
             }
 
             console.log(`✅ ${allQuestions.length} preguntas listas para jugar`);
-
             document.getElementById('loading-screen').classList.add('hidden');
             showQuestion();
         }
 
-        // ===== MOSTRAR PREGUNTA =====
+        // MOSTRAR PREGUNTA
         function showQuestion() {
             if (questionCountPerTeam[1] >= PREGUNTAS_POR_EQUIPO && 
                 questionCountPerTeam[2] >= PREGUNTAS_POR_EQUIPO && 
@@ -610,10 +787,8 @@
             document.getElementById('question-number').textContent = 
                 `Pregunta ${questionCountPerTeam[currentTeam.teamNumber]} de ${PREGUNTAS_POR_EQUIPO}`;
             
-            // Mostrar la pregunta
             const questionText = question.pregunta || 'Pregunta no disponible';
             document.getElementById('question-text').textContent = questionText;
-            console.log('📝 Mostrando pregunta:', questionText);
 
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
@@ -624,8 +799,6 @@
                 { text: question.opcion3 || 'Opción C', value: 'C' },
                 { text: question.opcion4 || 'Opción D', value: 'D' }
             ];
-
-            console.log('🎯 Opciones:', options);
 
             options.forEach(option => {
                 const button = document.createElement('button');
@@ -647,7 +820,6 @@
             }, 1000);
         }
 
-        // ===== ACTUALIZAR TEMPORIZADOR =====
         function updateTimer() {
             const timerElement = document.getElementById('timer');
             timerElement.textContent = timeLeft;
@@ -661,7 +833,6 @@
             }
         }
 
-        // ===== VERIFICAR RESPUESTA =====
         function checkAnswer(selectedAnswer) {
             clearInterval(timer);
             
@@ -681,7 +852,6 @@
             showResult(isCorrect, selectedAnswer === null, question);
         }
 
-        // ===== MOSTRAR RESULTADO =====
         function showResult(isCorrect, timeOut, question) {
             document.getElementById('question-screen').classList.add('hidden');
             document.getElementById('results-screen').classList.remove('hidden');
@@ -712,7 +882,6 @@
             }, 3000);
         }
 
-        // ===== SIGUIENTE PREGUNTA =====
         function nextQuestion() {
             currentQuestionIndex++;
             currentTeamIndex++;
@@ -733,7 +902,6 @@
             }
         }
 
-        // ===== ACTUALIZAR RANKING =====
         function updateRanking() {
             const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
             
@@ -743,7 +911,6 @@
             });
         }
 
-        // ===== FINALIZAR JUEGO =====
         function endGame() {
             document.getElementById('results-screen').classList.add('hidden');
             document.getElementById('final-screen').classList.remove('hidden');
@@ -774,15 +941,57 @@
             });
         }
 
-        // ===== NUEVA PARTIDA =====
         function newGame() {
             location.reload();
         }
 
-        // ===== INICIALIZAR =====
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 Juego de Etimología iniciado');
-        });
+        // PANEL DE ADMINISTRADOR
+        function toggleAdmin() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function loginAdmin() {
+            const password = document.getElementById('admin-password').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                loadAdminMaterias();
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        }
+
+        async function loadAdminMaterias() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getMaterias`);
+                const materias = await response.json();
+                
+                const list = document.getElementById('materias-list');
+                list.innerHTML = '';
+                
+                if (materias.length === 0) {
+                    list.innerHTML = '<p style="color: #7f8c8d;">No hay materias disponibles</p>';
+                    return;
+                }
+                
+                materias.forEach(materia => {
+                    const div = document.createElement('div');
+                    div.className = 'materia-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${materia.nombre}</strong>
+                            <div class="materia-count">${materia.totalPreguntas} preguntas</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+            }
+        }
     </script>
 </body>
 </html>
