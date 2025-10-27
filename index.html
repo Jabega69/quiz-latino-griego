@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Etimología Latina y Griega</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Quiz Etimología Latina y Griega v3.0</title>
     <style>
         * {
             margin: 0;
@@ -193,6 +196,8 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            color: #2c3e50;
+            font-weight: 500;
         }
 
         .option-btn:hover {
@@ -614,11 +619,13 @@
             optionsContainer.innerHTML = '';
             
             const options = [
-                { text: question.opcion1, value: 'A' },
-                { text: question.opcion2, value: 'B' },
-                { text: question.opcion3, value: 'C' },
-                { text: question.opcion4, value: 'D' }
+                { text: question.opcion1 || 'Opción A', value: 'A' },
+                { text: question.opcion2 || 'Opción B', value: 'B' },
+                { text: question.opcion3 || 'Opción C', value: 'C' },
+                { text: question.opcion4 || 'Opción D', value: 'D' }
             ];
+
+            console.log('🎯 Opciones:', options);
 
             options.forEach(option => {
                 const button = document.createElement('button');
